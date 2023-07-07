@@ -9,6 +9,6 @@ class PageController extends Controller
 {
     public function dashboard()
     {
-        return view('admin.dashboard');
+        return view('admin.projects.dashboard');
     }
 }

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Guest\PageController as GuestPageController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Admin\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,16 +17,25 @@ use App\Http\Controllers\Admin\PageController as AdminPageController;
 |
 */
 
+
 Route::get('/', [GuestPageController::class, 'home'])->name('guest.home');
 
-Route::get('/admin', [AdminPageController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('admin.dashboard');
 
 Route::middleware('auth')
     ->name('admin.')
     ->prefix('admin')
     ->group(function () {
-        Route::get('/profile', [AdminPageController::class, 'dashboard'])->name('dashboard');
-        Route::resource('posts', UserController::class);
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
+
+Route::middleware('auth', 'verified')
+    ->name('admin.')
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/', [AdminPageController::class, 'dashboard'])->name('dashboard');
+        Route::resource('project', ProjectController::class);
     });
 
 require __DIR__ . '/auth.php';
