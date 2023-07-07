@@ -44,5 +44,10 @@
         </tbody>
     </table>
 
-{{-- {{ $projects->links() }} --}}
+    {{-- {{ $projects->links() }}
+
+
+    <div class="px-4 d-flex flex-column justify-content-start" style=" font-size:20px; font-weight: 700">
+        {{ $projects->links() }}
+    </div> --}}
 @endsection
