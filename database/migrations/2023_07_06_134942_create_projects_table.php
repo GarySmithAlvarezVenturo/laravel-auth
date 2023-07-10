@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('languages', 50);
             $table->string('link_github', 150);
 
+            $table->softDeletes();
             $table->timestamps();
         });
     }

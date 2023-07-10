@@ -1,20 +1,30 @@
-@extends('layouts.base')
+@extends('Admin.layouts.base')
 
 @section('contents')
-<div class="bg-dark text-light py-2 mb-3">
-    <h1 class="ms-4" style="font-weight: 700">Cestino</h1>
-</div>
 
-@if (session('delete_success'))
+    @if (session('delete_success'))
     @php $project = session('delete_success') @endphp
     <div class="alert alert-danger">
-        Il progetto "{{ $project->title }}" è stato eliminato definitivamente
+        The project "{{ $project->title }}" has been Deleted
+        <form
+            action="{{ route("admin.project.restore", ['project' => $project]) }}"
+                method="post"
+                class="d-inline-block"
+            >
+            @csrf
+            <button class="btn btn-warning">Calcel</button>
+        </form>
     </div>
-@endif
+    @endif
 
-<div class="container">
+    @if (session('restore_success'))
+        @php $project = session('restore_success') @endphp
+        <div class="alert alert-success">
+            The project "{{ $project->title }}" has been Restored
+        </div>
+    @endif
 
-    <table class="table table-striped mt-4">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th scope="col">Title</th>
@@ -24,8 +34,7 @@
                 <th scope="col">Collaborators</th>
                 <th scope="col">Description</th>
                 <th scope="col">Languages</th>
-                <th scope="col">Link</th>
-                <th scope="col">Actions</th>
+                <th scope="col">Link Github</th>
             </tr>
         </thead>
         <tbody>
@@ -33,42 +42,52 @@
                 <tr>
                     <th scope="row">{{ $project->title }}</th>
                     <td>{{ $project->author }}</td>
-                    <td>{{ $project->creation_date}}</td>
+                    <td>{{ $project->creation_date }}</td>
                     <td>{{ $project->last_update }}</td>
                     <td>{{ $project->collaborators }}</td>
                     <td>{{ $project->description }}</td>
                     <td>{{ $project->languages }}</td>
-                    <td><a href="{{ $project->link_github }}">Link</a></td>
-
+                    <td>{{ $project->link_github }}</td>
                     <td>
-                        <form
-                            action=
-                            "{{ route('admin.projects.restore', ['project' => $project->id]) }}"
-                            method="post"
-                            class="d-inline-block"
-                        >
+                        <a class="btn btn-primary" href="{{ route('admin.project.show', ['project' => $project->id]) }}">View</a>
+                        <form class="d-inline-block" method="POST" action="{{ route('admin.project.restore', ['project' => $project->id]) }}">
                             @csrf
-                            <button class="btn btn-success">Ripristina</button>
+                            <button class="btn btn-warning">Restore</button>
                         </form>
-                        <form
-                            action="{{ route('admin.projects.harddelete', ['project' => $project->id]) }}"
-                            method="post"
-                            class="d-inline-block"
-                        >
-                            @csrf
-                            @method('delete')
-                            <button class="btn btn-danger button_delete">
-                                Elimina definitivamente
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-danger js-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ $project->id }}">
+                            Delete
+                        </button>
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
-</div>
-
-
-
-{{ $trashedComics->links() }}
+    <div class="modal fade text-dark" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="deleteModalLabel">Delete confirmation</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <form
+                        action=""
+                        method="post"
+                        class="d-inline-block"
+                        id="confirm-delete"
+                        data-template="{{ route('admin.project.harddelete', ['project' => '*****']) }}"
+                    >
+                        @csrf
+                        @method('delete')
+                        <button class="btn btn-danger">Yes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

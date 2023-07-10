@@ -9,11 +9,9 @@
 </head>
 <body>
     @include('admin.includes.header')
-
     <main>
         @yield('contents')
     </main>
-    
     @include('admin.includes.footer')
 </body>
 </html>

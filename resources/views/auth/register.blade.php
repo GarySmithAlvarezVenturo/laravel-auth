@@ -30,7 +30,7 @@
             value="{{ old('name') }}" >
         </div>
         <div class="mb-3">
-        <label for="password" class="form-label">Confirm Password</label>
+        <label for="password" class="form-label">Password</label>
         <input 
             type="password" 
             class="form-control" 
@@ -59,6 +59,6 @@
             Forgot your password?
         </a>
 
-        <button type="submit" class="btn btn-primary">Register</button>
+        <button type="submit" class="btn btn-primary">Login</button>
     </form>
 @endsection

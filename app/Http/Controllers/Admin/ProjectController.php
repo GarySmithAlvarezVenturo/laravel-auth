@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 class ProjectController extends Controller
 {
     private $validations = [
-        'title' => 'required|string|max:50',
-        'creation_date' => 'required|date|max:20',
-        'last_update' => 'required|date|max:20',
-        'author' => 'required|string|max:30',
+        'title'         => 'required|string|min:4|max:50',
+        'author'        => 'required|string|max:30',
+        'creation_date' => 'required|date',
+        'last_update'   => 'required|date',
         'collaborators' => 'nullable|string|max:150',
-        'description' => 'nullable|string|',
-        'languages' => 'required|string|max:50',
-        'link_github' => 'required|string|max:150',
+        'description'   => 'nullable|string',
+        'languages'     => 'required|string|max:50',
+        'link_github'   => 'required|string|max:150',
     ];
 
     /**
@@ -26,8 +26,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::paginate(5);
-
+        $projects = Project::all();
         return view('admin.projects.index', compact('projects'));
     }
 
@@ -38,7 +37,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('admin.projects.create');
+        return view('Admin.projects.create');
     }
 
     /**
@@ -49,28 +48,26 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-         //validare i dati
+        // validare i dati 
+        $request->validate($this->validations);
 
-         $request->validate($this->validations);
+        $data = $request->all();
+        // Salvare i dati nel database
+        $newProject = new Project();
+        $newProject->title = $data['title'];
+        $newProject->author = $data['author'];
+        $newProject->creation_date = $data['creation_date'];
+        $newProject->last_update = $data['last_update'];
+        $newProject->collaborators = $data['collaborators'];
+        $newProject->description = $data['description'];
+        $newProject->languages = $data['languages'];
+        $newProject->link_github = $data['link_github'];
+        $newProject->save();
 
-         $data = $request->all();
- 
-         // salvare i dati nel database
- 
-         $newProject = new Project();
- 
-         $newProject->title = $data['title'];
-         $newProject->creation_date = $data['creation_date'];
-         $newProject->last_update = $data['last_update'];
-         $newProject->author = $data['author'];
-         $newProject->collaborators = $data['collaborators'];
-         $newProject->description = $data['description'];
-         $newProject->languages = $data['languages'];
-         $newProject->link_github = $data['link_github'];
- 
-         $newProject->save();
- 
-         return redirect()->route('admin.projects.show', ['project' => $newProject->id]);
+        // return 'commentare se serve debuggare';
+        // $newComic = Comic::create($data);
+
+        return redirect()->route('Admin.project.show', ['project' => $newProject]);
     }
 
     /**
@@ -104,26 +101,26 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //validare i dati
-
+        // validare i dati 
         $request->validate($this->validations);
 
         $data = $request->all();
+        // Salvare i dati nel database
+        $newProject = new Project();
+        $newProject->title = $data['title'];
+        $newProject->author = $data['author'];
+        $newProject->creation_date = $data['creation_date'];
+        $newProject->last_update = $data['last_update'];
+        $newProject->collaborators = $data['collaborators'];
+        $newProject->description = $data['description'];
+        $newProject->languages = $data['languages'];
+        $newProject->link_github = $data['link_github'];
+        $newProject->update();
 
-        // salvare i dati nel database
+        // return 'commentare se serve debuggare';
+        // $newComic = Comic::create($data);
 
-        $project->title = $data['title'];
-        $project->creation_date = $data['creation_date'];
-        $project->last_update = $data['last_update'];
-        $project->author = $data['author'];
-        $project->collaborators = $data['collaborators'];
-        $project->description = $data['description'];
-        $project->languages = $data['languages'];
-        $project->link_github = $data['link_github'];
-
-        $project->update();
-
-        return redirect()->route('admin.projects.index', ['project' => $project->id]);
+        return redirect()->route('Admin.project.show', ['project' => $newProject]);
     }
 
     /**
@@ -136,31 +133,31 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        return to_route('admin.projects.index')->with('delete_success', $project);
+        return to_route('admin.project.index')->with('delete_success', $project);
     }
 
-     //da qui in avanti bisogna richiamare i route dal web.php perchè il comando si ferma a 'destroy'
+    public function restore($id)
+    {
+        Project::withTrashed()->where('id', $id)->restore();
 
-     public function restore($id)
-     {
-         Project::withTrashed()->where('id', $id)->restore();
- 
-         $project = Project::find($id);
- 
-         return to_route('admin.projects.index')->with('restore_success', $project);
-     }
-     public function trashed()
-     {
-         $trashedProjects = Project::onlyTrashed()->paginate(5);
- 
-         return view('admin.projects.trashed', compact('trashedProjects'));
- 
-     }
-     public function harddelete($id)
-     {
-         $project = Project::withTrashed()->find($id);
-         $project->forceDelete();
- 
-         return to_route('admin.projects.trashed')->with('delete_success', $project);
-     }
+        $project = Project::find($id);
+
+        return to_route('admin.project.trashed')->with('restore_success', $project);
+    }
+
+    public function trashed()
+    {
+        // $projects = project::all(); // SELECT * FROM `projects`
+        $trashedProjects = Project::onlyTrashed()->paginate(6);
+
+        return view('admin.projects.trashed', compact('trashedProjects'));
+    }
+
+    public function harddelete($id)
+    {
+        $project = Project::withTrashed()->find($id);
+        $project->forceDelete();
+
+        return to_route('admin.project.trashed')->with('delete_success', $project);
+    }
 }
